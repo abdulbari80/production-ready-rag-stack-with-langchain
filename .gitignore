@@ -1,17 +1,59 @@
-# gitignore template for LangChain products, e.g., LangGraph, LangSmith
-# website: https://www.langchain.com/
-# website: https://www.langchain.com/langgraph
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# LangGraph
-.langgraph_api/
-
-# environment files
-.env
+# Environment
 .venv/
 env/
+*.env
 
-# other ignores
-__pycache__/
-notebooks/
+# pipenv / poetry / uv environment files
+Pipfile.lock
+poetry.lock
+uv.lock
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# VS Code settings
+.vscode/
+
+# PyCharm settings
+.idea/
+
+# Byte-compiled / distribution / packaging
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+*.tar.gz
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/
+
+# FAISS vector store folder (optional, if you want to regenerate locally)
+vector_store/
+
+# Temporary uploads
 data/
-*.pyc
+notebook/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# Testing and profiling
+pytest_cache/
+*.prof
+
+# FastAPI file uploads
+*.uploaded
