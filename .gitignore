@@ -40,7 +40,7 @@ Thumbs.db
 # Streamlit
 .streamlit/
 
-# FAISS vector store folder (optional, if you want to regenerate locally)
+# FAISS vector store folder 
 vector_store/
 
 # Temporary uploads
