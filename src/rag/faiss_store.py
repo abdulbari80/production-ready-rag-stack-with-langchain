@@ -12,8 +12,8 @@ from src.rag.exceptions import (
     VectorStoreNotInitializedError,
     DocumentLoadError,
     EmbeddingModelError,
-    RetrievalError,
-)
+    RetrievalError)
+
 from .config import settings
 
 logger = get_logger(__name__)
@@ -31,24 +31,19 @@ class FaissStore:
 
     def __init__(
         self,
-        store_dir: Optional[str] = None,
-        embedding_model: Optional[HuggingFaceEmbeddings] = None
-    ):
+        embedding_model: Optional[HuggingFaceEmbeddings] = None):
         """
         Initialize FAISS store wrapper.
 
         Args:
-            store_dir (Optional[str]): Directory path for storing FAISS index files.
             embedding_model (Optional[SentenceTransformerEmbeddings]): Optional custom embedding model.
-            custom_logger (Optional[Logger]): Optional logger instance.
         """
-        self.store_dir = store_dir or DEFAULT_STORE_DIR
         self.embedding_model = embedding_model or HuggingFaceEmbeddings(model_name=MODEL_NAME)
+        self.store_dir = DEFAULT_STORE_DIR
         self.vector_store: Optional[FAISS] = None
 
         # Ensure store directory exists
         os.makedirs(self.store_dir, exist_ok=True)
-        logger.info(f"FAISS store directory set to: {self.store_dir}")
 
     @property
     def is_loaded(self) -> bool:
@@ -74,12 +69,15 @@ class FaissStore:
 
         try:
             logger.info(f"Creating FAISS store with {len(documents)} documents...")
-            self.vector_store = FAISS.from_documents(documents, embedding=self.embedding_model)
+            self.vector_store = FAISS.from_documents(documents, 
+                                                     embedding=self.embedding_model,
+                                                     normalize_L2 = True
+                                                     )
             self.vector_store.save_local(self.store_dir)
             logger.info(
                 f"FAISS store successfully created and saved at: {self.store_dir} "
-                f"with {self.vector_store.index.ntotal} vectors."
-            )
+                f"with {self.vector_store.index.ntotal} vectors.")
+            
             return self.vector_store
 
         except Exception as e:
@@ -97,14 +95,10 @@ class FaissStore:
             DocumentLoadError: If the index cannot be found or loaded.
         """
         try:
-            logger.info(f"Loading FAISS store from directory: {self.store_dir}...")
             self.vector_store = FAISS.load_local(
                 self.store_dir,
-                embedding=self.embedding_model,
-                allow_dangerous_deserialization=True,
-            )
-            logger.info(
-                f"FAISS store successfully loaded with {self.vector_store.index.ntotal} vectors."
+                embeddings=self.embedding_model,
+                allow_dangerous_deserialization=True
             )
             return self.vector_store
 
@@ -115,7 +109,8 @@ class FaissStore:
             logger.exception("Error while loading FAISS store.")
             raise DocumentLoadError(f"Failed to load FAISS store: {str(e)}") from e
 
-    def similarity_search(self, query: str, k: int = 3) -> List[Document]:
+    def similarity_search(self, query: str="What is privacy?", 
+                          k: int = 3) -> List[Document]:
         """
         Perform a similarity search on the FAISS index.
 
@@ -135,9 +130,7 @@ class FaissStore:
             raise VectorStoreNotInitializedError()
 
         try:
-            logger.info(f"Performing similarity search for query: '{query}' (top {k})")
-            results = self.vector_store.similarity_search(query, k=k)
-            logger.info(f"Similarity search returned {len(results)} results.")
+            results = self.vector_store.similarity_search_with_score(query, k=k)
             return results
 
         except Exception as e:
