@@ -4,7 +4,6 @@ from langchain_core.documents import Document
 from src.rag.logger import get_logger
 from src.rag.exceptions import VectorStoreNotInitializedError
 from src.rag.faiss_store import FaissStore
-# from src.rag.llm_connector import get_llm_response
 from src.rag.config import settings 
 
 from langchain_ollama import ChatOllama  # or OllamaLLM
