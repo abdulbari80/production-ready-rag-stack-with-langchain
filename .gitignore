@@ -42,6 +42,7 @@ Thumbs.db
 
 # FAISS vector store folder 
 vector_store/
+vector_store_au/
 
 # Temporary uploads
 data/
