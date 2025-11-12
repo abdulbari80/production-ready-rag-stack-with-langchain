@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     top_k: int = 3
     llm_temperature: float = 0.2
     threshold: float = 0.5
+    context_window_size: int = 2048
 
 settings = Settings()
 
