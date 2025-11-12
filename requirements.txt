@@ -30,3 +30,4 @@ torch==2.5.1
 # === API Framework ===
 fastapi==0.119.1
 uvicorn==0.30.0
+streamlit==1.50.0
