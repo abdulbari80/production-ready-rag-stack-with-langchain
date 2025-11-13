@@ -20,7 +20,8 @@ logger = get_logger(__name__)
 @st.cache_resource(show_spinner=False)
 def initialize_pipeline():
     """Initialize FAISS store and RAG pipeline (cached for performance)."""
-    
+    logger.info("\n")
+    logger.info("Here we go >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     faiss_store = FaissStore()
 
     if FAISS_DIR.exists() and any(FAISS_DIR.iterdir()):
@@ -47,8 +48,9 @@ rag_pipeline = initialize_pipeline()
 # ---------------- STREAMLIT UI ----------------
 st.set_page_config(page_title="Maban AI", layout="wide")
 
-st.title("My AI Buddy")
-st.markdown("Ask questions and get AI-generated answers.")
+# st.title("Maban AI")
+st.subheader("My AI Buddy")
+st.markdown("Ask question and get AI-generated answer")
 
 # Sidebar info
 st.sidebar.header("Settings")
@@ -59,11 +61,18 @@ st.sidebar.markdown("---")
 st.sidebar.info("Powered by Ollama + Llama3.2 + LangChain + FAISS")
 
 # Query input
-user_query = st.text_area("Enter your question:", placeholder="e.g., What is privacy?")
+user_query = st.text_area("Enter your question:", placeholder="e.g., What are the privacy priciples set in this law?")
 submit = st.button("Answer")
 
 # ---------------- MAIN LOGIC ----------------
-if submit and user_query.strip():
+if "response" not in st.session_state:
+    st.session_state.response = None
+    st.session_state.retrieved_docs = []
+
+if submit:
+    st.session_state.response = None  # clear previous result
+    st.session_state.retrieved_docs = []
+    
     try:
         with st.spinner("Thinking... please wait."):
             response, retrieved_docs = rag_pipeline.user_interaction(
@@ -71,17 +80,8 @@ if submit and user_query.strip():
                 top_k=top_k_override,
                 return_context=show_context
             )
-
-        st.subheader("AI Response")
-        st.markdown(response)
-
-        if show_context:
-            st.subheader("Retrieved Context")
-            for i, doc in enumerate(retrieved_docs, start=1):
-                st.markdown(f"**Document {i}:**\n{doc.page_content}")
-                if doc.metadata:
-                    st.caption(str(doc.metadata))
-                st.markdown("---")
+        st.session_state.response = response
+        st.session_state.retrieved_docs = retrieved_docs
 
     except RAGBaseException as e:
         st.error(f"RAG Error: {str(e)}")
@@ -90,6 +90,17 @@ if submit and user_query.strip():
         st.exception(f"Unexpected Error: {e}")
         logger.exception(f"Unexpected error: {e}")
 
+# --- Display results after single call ---
+if st.session_state.response:
+    st.subheader("AI Response")
+    st.markdown(st.session_state.response)
+
+    if show_context:
+        st.subheader("Retrieved Context")
+        for i, doc in enumerate(st.session_state.retrieved_docs, start=1):
+            st.markdown(f"**Document {i}:**\n{doc.page_content}")
+            if doc.metadata:
+                st.caption(str(doc.metadata))
+            st.markdown("---")
 else:
     st.info("Enter a question and click 'Answer'.")
-
