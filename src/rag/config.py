@@ -8,8 +8,9 @@ class Settings(BaseSettings):
     embedding_model_name: str = "all-MiniLM-L6-v2"
     llm_model_name: str = "llama3.2:3b"
     top_k: int = 3
-    llm_temperature: float = 0.2
-    threshold: float = 0.5
+    llm_temperature: float = 0.20
+    threshold: float = 1.50
+    relative_factor : float = 1.20
     context_window_size: int = 2048
 
 settings = Settings()
